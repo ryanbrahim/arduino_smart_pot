@@ -12,8 +12,10 @@
 const pin_t BLUE_LED = D0;
 const pin_t RED_LED = D3;
 const pin_t YELLOW_LED = D0;
-const int period = 100;
+const pin_t SENSOR_PIN = A1;
+const int period = 1000;
 bool flash_on = true;
+char* buffer = (char*)malloc(64 * sizeof(char));
 
 // The following line is optional, but recommended in most firmware. It
 // allows your code to run before the cloud is connected. In this case,
@@ -38,6 +40,7 @@ void setup()
   pinMode(BLUE_LED, OUTPUT);
   pinMode(RED_LED, OUTPUT);
   pinMode(YELLOW_LED, OUTPUT);
+  pinMode(SENSOR_PIN, INPUT);
 
   Serial.begin(9600);
   waitFor(Serial.isConnected, 30000);
@@ -65,12 +68,13 @@ void loop()
     // Serial.println("Switching to yellow!");
     delay(period);
 
-    IPAddress test_url = WiFi.resolve("www.google.com");
-    int num_packets = WiFi.ping(test_url);
-    Serial.printf("Received %d packets\n", num_packets);
+    int sensor_val = analogRead(SENSOR_PIN);
+    sprintf(buffer, "%d", sensor_val);
+    Serial.printf("sensor_val = %s \n", buffer);
 
-    Serial.printf("`www.google.com` resolves to ");
-    Serial.println(test_url);
+    Particle.publish("raw-moisture-sensor", buffer);
+
+
   }
 
 
