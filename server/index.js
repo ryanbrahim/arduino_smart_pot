@@ -23,6 +23,8 @@ app.get('/', (req, res) => {
 app.use(bodyParser.json())
 app.post("/hook", (req, res) => {
   // console.log(`Got a POST: ${JSON.stringify(req.body, null, 2)}`) // Call your action on the request here
-  console.log(`Moisture level: ${req.body.data} at ${req.body.published_at}`)
+  let moisture_level_data = req.body.data;
+  let timestamp = req.body.published_at;
+  console.log(`Moisture level: ${moisture_level_data} at ${timestamp}`)
   res.status(200).end() // Responding is important
 })
