@@ -9,13 +9,16 @@
 //
 // In this tutorial, we're using the blue D7 LED (next to D7 on the Photon
 // and Electron, and next to the USB connector on the Argon and Boron).
-const pin_t BLUE_LED = D0;
-const pin_t RED_LED = D3;
-const pin_t YELLOW_LED = D0;
-const pin_t SENSOR_PIN = A1;
-const int period = 1000;
+const pin_t GREEN_LED = D4;
+const pin_t RED_LED = D0;
+const pin_t YELLOW_LED = D2;
+const pin_t SENSOR_PIN = A5;
+const int polling_period = 50;
 bool flash_on = true;
 char* buffer = (char*)malloc(64 * sizeof(char));
+const unsigned int SAMPLES_PER_PACKET = 100;
+unsigned int sample_count = 0;
+unsigned int running_sum = 0;
 
 // The following line is optional, but recommended in most firmware. It
 // allows your code to run before the cloud is connected. In this case,
@@ -37,7 +40,7 @@ void setup()
   // In order to set a pin, you must tell Device OS that the pin is
   // an OUTPUT pin. This is often done from setup() since you only need
   // to do it once.
-  pinMode(BLUE_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
   pinMode(RED_LED, OUTPUT);
   pinMode(YELLOW_LED, OUTPUT);
   pinMode(SENSOR_PIN, INPUT);
@@ -54,25 +57,34 @@ void loop()
   if (flash_on)
   {
     digitalWrite(YELLOW_LED, LOW);
-    digitalWrite(BLUE_LED, HIGH);
+    digitalWrite(GREEN_LED, HIGH);
     // Serial.println("Switching to blue!");
-    delay(period);
+    delay(polling_period);
 
-    digitalWrite(BLUE_LED, LOW);
+    digitalWrite(GREEN_LED, LOW);
     digitalWrite(RED_LED, HIGH);
     // Serial.println("Switching to red!");
-    delay(period);
+    delay(polling_period);
 
     digitalWrite(RED_LED, LOW);
     digitalWrite(YELLOW_LED, HIGH);
     // Serial.println("Switching to yellow!");
-    delay(period);
+    delay(polling_period);
 
     int sensor_val = analogRead(SENSOR_PIN);
-    sprintf(buffer, "%d", sensor_val);
-    Serial.printf("sensor_val = %s \n", buffer);
+    Serial.printf("sensor_val = %d | running_sum = %d | sample # %d\n", sensor_val, running_sum, sample_count);
 
-    Particle.publish("raw-moisture-sensor", buffer);
+    if (sample_count < SAMPLES_PER_PACKET){
+      running_sum += sensor_val;
+      sample_count++;
+    } 
+    else {
+      sample_count = 0;
+      sprintf(buffer, "%d", running_sum / SAMPLES_PER_PACKET);
+      Particle.publish("raw-moisture-sensor", buffer);
+      running_sum = 0;
+    }
+    
 
 
   }
