@@ -61,3 +61,6 @@ dkms.conf
 */target/
 *.properties
 *.cpp
+
+# DO NOT COMMIT TOKENS
+*.secret
