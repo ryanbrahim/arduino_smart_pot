@@ -51,6 +51,9 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# Node.js gitignore
+*/node_modules/
+
 # vscode settings
 *.vscode/
 
