@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server index.js",
-    "tunnel": "ngrok http 25565"
+    "tunnel": "npx localtunnel --port 25565"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +14,7 @@
   "dependencies": {
     "body-parser": "^1.20.2",
     "express": "^4.18.2",
+    "localtunnel": "^2.0.2",
     "ngrok": "^4.3.3",
     "nodemon": "^2.0.22"
   }
