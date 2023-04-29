@@ -1,6 +1,10 @@
 // Require express and body-parser
 const express = require("express")
 const bodyParser = require("body-parser")
+const fs = require('fs')
+
+// Open file for logging
+
 
 // Initialize express and define a port
 const app = express()
@@ -26,5 +30,11 @@ app.post("/hook", (req, res) => {
   let moisture_level_data = req.body.data;
   let timestamp = req.body.published_at;
   console.log(`Moisture level: ${moisture_level_data} at ${timestamp}`)
+
+  let logger = fs.createWriteStream('moisture_data.csv', {
+    flags: 'a' // 'a' means appending (old data will be preserved)
+  })
+  logger.write(`${moisture_level_data}, ${timestamp}\n`)
+  logger.end()
   res.status(200).end() // Responding is important
 })
