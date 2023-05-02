@@ -51,7 +51,6 @@ app.post("/hook", (req, res) => {
   res.status(200).end(); // Responding is important
 });
 
-
 // HTTP GET data from database
 app.get("/data", async (req, res) => {
   console.log("\n------- Handling data request! -------");
