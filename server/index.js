@@ -3,6 +3,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3");
 
+// Constants & parameters
+const DB_SAMPLES_TO_RETURN = 50;
+
 // Connect to database
 const db = new sqlite3.Database("./test.db", sqlite3.OPEN_READWRITE, (err) => {
   if (err) return console.error(err.message);
@@ -54,7 +57,7 @@ app.get("/data", async (req, res) => {
   console.log("\n------- Handling data request! -------");
   // Query the database
 
-  sql = `SELECT * FROM moisture_series`;
+  sql = `SELECT * FROM moisture_series ORDER BY timestamp DESC LIMIT ${DB_SAMPLES_TO_RETURN}`;
   db.serialize(() => {
     db.all(sql, [], (err, moisture_data) => {
       if (err) return console.error(err.message);
