@@ -64,3 +64,6 @@ dkms.conf
 
 # DO NOT COMMIT TOKENS
 *.secret
+
+# database files
+*.db
