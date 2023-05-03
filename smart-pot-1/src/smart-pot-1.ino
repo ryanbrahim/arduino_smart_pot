@@ -13,10 +13,14 @@ const pin_t GREEN_LED = D4;
 const pin_t RED_LED = D0;
 const pin_t YELLOW_LED = D2;
 const pin_t SENSOR_PIN = A5;
-const int polling_period = 50;
+const int SAMPLING_PERIOD = 50;
+const int WAITING_PERIOD = 333;
 bool flash_on = true;
 char* buffer = (char*)malloc(64 * sizeof(char));
-const unsigned int SAMPLES_PER_PACKET = 100;
+const unsigned int LOOPS_UNTIL_SAMPLE = 300;
+const unsigned int SAMPLES_PER_PACKET = 10;
+unsigned int period = WAITING_PERIOD;
+unsigned int waiting_count = 0;
 unsigned int sample_count = 0;
 unsigned int running_sum = 0;
 
@@ -56,33 +60,47 @@ void loop()
 {
   if (flash_on)
   {
+    // Determine mode
+    bool waiting_mode = waiting_count < LOOPS_UNTIL_SAMPLE;
+    period = (waiting_mode) ? WAITING_PERIOD : SAMPLING_PERIOD;
+
+
     digitalWrite(YELLOW_LED, LOW);
     digitalWrite(GREEN_LED, HIGH);
     // Serial.println("Switching to blue!");
-    delay(polling_period);
+    delay(period);
 
     digitalWrite(GREEN_LED, LOW);
     digitalWrite(RED_LED, HIGH);
     // Serial.println("Switching to red!");
-    delay(polling_period);
+    delay(period);
 
     digitalWrite(RED_LED, LOW);
     digitalWrite(YELLOW_LED, HIGH);
     // Serial.println("Switching to yellow!");
-    delay(polling_period);
+    delay(period);
 
     int sensor_val = analogRead(SENSOR_PIN);
     Serial.printf("sensor_val = %d | running_sum = %d | sample # %d\n", sensor_val, running_sum, sample_count);
 
-    if (sample_count < SAMPLES_PER_PACKET){
+
+
+    // Loop slowly until it is time to sample
+    if (waiting_mode) {
+      waiting_count++;
+    }
+    // Loop quickly during sampling
+    else if (sample_count < SAMPLES_PER_PACKET) {
       running_sum += sensor_val;
       sample_count++;
     } 
+    // Reset, publish, and start looping slowly again
     else {
-      sample_count = 0;
       sprintf(buffer, "%d", running_sum / SAMPLES_PER_PACKET);
       Particle.publish("raw-moisture-sensor", buffer);
       running_sum = 0;
+      sample_count = 0;
+      waiting_count = 0;
     }
     
 
